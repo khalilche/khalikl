@@ -27,7 +27,7 @@ local trampoline = script.Parent -- El objeto que actuará como trampolín
 local BOUNCE_FORCE = 75 -- Fuerza del impulso hacia arriba (ajustable: 50-100)
 local COOLDOWN_TIME = 0.7 -- Tiempo de espera entre saltos (segundos)
 local BOUNCE_DURATION = 0.3 -- Duración del efecto visual de rebote (segundos)
-local SCALE_FACTOR = 0.85 -- Factor de compresión del trampolín (0.8 = 20% más pequeño)
+local SCALE_FACTOR = 0.85 -- Factor de compresión del trampolín (0.85 = 15% más pequeño)
 local VELOCITY_THRESHOLD = 5 -- Umbral de velocidad Y para activación (evita activación lateral)
 local IMPULSE_DURATION = 0.2 -- Duración del BodyVelocity en segundos
 
@@ -196,6 +196,7 @@ local function onTouched(hit)
     
     -- Verificar que el jugador esté cayendo o tocando desde arriba
     -- Esto evita que el trampolín se active al tocar los lados
+    -- Nota: velocity.Y negativo = cayendo, positivo = subiendo
     local velocity = hit.AssemblyLinearVelocity
     if velocity.Y > VELOCITY_THRESHOLD then
         -- El jugador está subiendo rápidamente, no activar
@@ -228,6 +229,13 @@ local function initialize()
     
     -- Conectar el evento de toque
     trampoline.Touched:Connect(onTouched)
+    
+    -- Limpiar cooldowns cuando jugadores se desconectan (prevenir memory leaks)
+    game.Players.PlayerRemoving:Connect(function(player)
+        if playersOnCooldown[player.UserId] then
+            playersOnCooldown[player.UserId] = nil
+        end
+    end)
     
     print("[Trampoline] Script inicializado correctamente en:", trampoline.Name)
 end
