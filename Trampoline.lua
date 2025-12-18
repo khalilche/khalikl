@@ -28,6 +28,8 @@ local BOUNCE_FORCE = 75 -- Fuerza del impulso hacia arriba (ajustable: 50-100)
 local COOLDOWN_TIME = 0.7 -- Tiempo de espera entre saltos (segundos)
 local BOUNCE_DURATION = 0.3 -- Duración del efecto visual de rebote (segundos)
 local SCALE_FACTOR = 0.85 -- Factor de compresión del trampolín (0.8 = 20% más pequeño)
+local VELOCITY_THRESHOLD = 5 -- Umbral de velocidad Y para activación (evita activación lateral)
+local IMPULSE_DURATION = 0.2 -- Duración del BodyVelocity en segundos
 
 -- ============================================================================
 -- VARIABLES DE ESTADO
@@ -162,7 +164,7 @@ local function applyBounceForce(humanoidRootPart)
     bodyVelocity.Parent = humanoidRootPart
     
     -- Remover el BodyVelocity después de un breve momento para un impulso suave
-    Debris:AddItem(bodyVelocity, 0.2)
+    Debris:AddItem(bodyVelocity, IMPULSE_DURATION)
 end
 
 --[[
@@ -195,7 +197,7 @@ local function onTouched(hit)
     -- Verificar que el jugador esté cayendo o tocando desde arriba
     -- Esto evita que el trampolín se active al tocar los lados
     local velocity = hit.AssemblyLinearVelocity
-    if velocity.Y > 5 then
+    if velocity.Y > VELOCITY_THRESHOLD then
         -- El jugador está subiendo rápidamente, no activar
         return
     end
